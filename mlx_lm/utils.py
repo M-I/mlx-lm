@@ -844,6 +844,7 @@ def quantize_model(
 
     bpw = compute_bits_per_weight(model)
     print(f"[INFO] Quantized model with {bpw:.3f} bits per weight.")
+    quantized_config['bpw'] = bpw
 
     return model, quantized_config
 
