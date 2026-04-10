@@ -97,6 +97,7 @@ def convert(
         Union[Callable[[str, nn.Module, dict], Union[bool, dict]], str]
     ] = None,
     trust_remote_code: bool = False,
+    dry_run: bool = False,
 ):
     # Check the save path is empty
     if isinstance(mlx_path, str):
