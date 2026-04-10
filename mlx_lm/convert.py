@@ -157,7 +157,7 @@ def convert(
             mode=q_mode,
             quant_predicate=quant_predicate,
         )
-        if config["dry_run"]:
+        if dry_run:
             quit()
 
     if dequantize:
