@@ -98,6 +98,7 @@ def convert(
     ] = None,
     trust_remote_code: bool = False,
     dry_run: bool = False,
+    slow_storage: bool = False,
 ):
     # Check the save path is empty
     if isinstance(mlx_path, str):
@@ -108,6 +109,11 @@ def convert(
             f"Cannot save to the path {mlx_path} as it already exists."
             " Please delete the file/directory or specify a new path to save to."
         )
+
+    if slow_storage:
+        initial_device = mx.default_device()
+        mx.set_default_device(mx.cpu)
+        current_device = mx.default_device()
 
     print("[INFO] Loading")
     model, tokenizer, config = load(
@@ -173,7 +179,10 @@ def convert(
         tokenizer,
         config,
     )
-
+    
+    if slow_storage:
+        mx.set_default_device(initial_device)
+        
     if upload_repo is not None:
         upload_to_hub(mlx_path, upload_repo)
 
@@ -253,6 +262,12 @@ def configure_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--trust-remote-code",
         help="Trust remote code when loading tokenizer.",
+        action="store_true",
+        default=False,
+    )
+    parser.add_argument(
+        "--slow-storage",
+        help="Force CPU loading to avoid GPU timeouts when using slow disks (e.g. HDD, network storage).",
         action="store_true",
         default=False,
     )
