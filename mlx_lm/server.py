@@ -293,6 +293,10 @@ class ModelProvider:
 
     # Added in adapter_path to load dynamically
     def load(self, model_path, adapter_path=None, draft_model_path=None):
+        initial_device = mx.default_device()
+        if self.cli_args.slow_storage:
+            mx.set_default_device(mx.cpu)
+            
         model_path = self.default_model_map.get(model_path, model_path)
         if self.model_key == (model_path, adapter_path, draft_model_path):
             return self.model, self.tokenizer
@@ -374,6 +378,9 @@ class ModelProvider:
                 hasattr(c, "merge") for c in make_prompt_cache(self.model)
             )
 
+        if self.cli_args.slow_storage:
+            mx.set_default_device(initial_device)
+            
         return self.model, self.tokenizer
 
 
@@ -1870,6 +1877,11 @@ def main():
         "--pipeline",
         action="store_true",
         help="Use pipelining instead of tensor parallelism",
+    )
+    parser.add_argument(
+        "--slow-storage",
+        action="store_true",
+        help="Run model loading on CPU to avoid GPU timeouts with slow or streaming storage",
     )
     args = parser.parse_args()
     if mx.metal.is_available():
